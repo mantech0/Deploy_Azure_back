@@ -1,8 +1,18 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+import os
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "http://localhost:3000"}})  # CORS設定を更新
+
+# CORS設定を更新
+CORS(app, resources={
+    r"/api/*": {
+        "origins": [
+            "http://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net",
+            "http://localhost:3000"
+            ]
+        }
+    })  
 
 @app.route('/', methods=['GET'])
 def hello():
@@ -30,4 +40,5 @@ def echo():
     return jsonify({"message": f"echo: {message}"})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port=int(os.environ.get('PORT',8000))
+    app.run(host='0.0.0.0', port=port, debug=False)
