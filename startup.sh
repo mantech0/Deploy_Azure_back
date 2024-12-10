@@ -1,44 +1,29 @@
 #!/bin/bash
 
-# デバッグ情報の出力
+# デバッグモードを有効化
 set -x
 
-# カレントディレクトリの確認
-pwd
+echo "Current directory: $(pwd)"
+echo "Directory contents:"
 ls -la
 
 # 依存関係のインストール
 pip install -r requirements.txt
 
-# データディレクトリの作成とCSVファイルのコピー
-mkdir -p data
-cp -f data/*.csv data/ || echo "Warning: CSV copy failed"
-
-# CSVファイルの存在確認
-echo "Checking CSV files..."
-ls -la data/
-
 # 環境変数の設定
 export PORT=8000
 export WEBSITES_PORT=8000
 
-# デバッグ情報
-echo "Debug Information:"
-echo "Current directory: $(pwd)"
-echo "Files in current directory: $(ls -la)"
-echo "Files in data directory: $(ls -la data)"
-echo "PORT: $PORT"
-echo "WEBSITES_PORT: $WEBSITES_PORT"
-echo "PYTHON_VERSION: $PYTHON_VERSION"
+echo "Starting application on port: $PORT"
 
-# アプリケーションの起動
-echo "Starting Gunicorn on port $PORT..."
+# Gunicornでアプリケーションを起動
 exec gunicorn \
     --bind=0.0.0.0:$PORT \
     --timeout 600 \
-    --workers 1 \
+    --workers 2 \
+    --threads 2 \
+    --worker-class=gthread \
     --access-logfile - \
     --error-logfile - \
     --log-level debug \
-    --capture-output \
     app:app
