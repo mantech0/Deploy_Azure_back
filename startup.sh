@@ -3,19 +3,16 @@
 # デバッグ情報の出力
 set -x
 
-# アプリケーションのルートディレクトリ
-export APP_ROOT=/home/site/wwwroot
-
-# Pythonパスを設定
-export PYTHONPATH=$APP_ROOT
+# カレントディレクトリの確認
+pwd
+ls -la
 
 # 依存関係のインストール
-cd $APP_ROOT
 pip install -r requirements.txt
 
 # データディレクトリの作成とCSVファイルのコピー
 mkdir -p data
-cp -f /home/site/repository/data/*.csv data/ || echo "Warning: CSV copy failed"
+cp -f data/*.csv data/ || echo "Warning: CSV copy failed"
 
 # CSVファイルの存在確認
 echo "Checking CSV files..."
@@ -31,13 +28,11 @@ fi
 # デバッグ情報
 echo "Debug Information:"
 echo "Current directory: $(pwd)"
-echo "APP_ROOT: $APP_ROOT"
-echo "Files in APP_ROOT: $(ls -la $APP_ROOT)"
+echo "Files in current directory: $(ls -la)"
 echo "Files in data directory: $(ls -la data)"
 echo "PORT: $PORT"
 echo "WEBSITES_PORT: $WEBSITES_PORT"
 echo "PYTHON_VERSION: $PYTHON_VERSION"
-echo "PYTHONPATH: $PYTHONPATH"
 
 # アプリケーションの起動
 echo "Starting Gunicorn on port $PORT..."
