@@ -19,11 +19,8 @@ echo "Checking CSV files..."
 ls -la data/
 
 # 環境変数の設定
-if [ -n "$WEBSITES_PORT" ]; then
-    export PORT=$WEBSITES_PORT
-else
-    export PORT=8000
-fi
+export PORT=8000
+export WEBSITES_PORT=8000
 
 # デバッグ情報
 echo "Debug Information:"
