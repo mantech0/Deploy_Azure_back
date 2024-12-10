@@ -1,9 +1,16 @@
 #!/bin/bash
 
+# デバッグ情報の出力
+set -x
+
+# アプリケーションのルートディレクトリ
+export APP_ROOT=/home/site/wwwroot
+
 # Pythonパスを設定
-export PYTHONPATH=/home/site/wwwroot
+export PYTHONPATH=$APP_ROOT
 
 # 依存関係のインストール
+cd $APP_ROOT
 pip install -r requirements.txt
 
 # データディレクトリの作成とCSVファイルのコピー
@@ -22,15 +29,17 @@ else
 fi
 
 # デバッグ情報
+echo "Debug Information:"
 echo "Current directory: $(pwd)"
+echo "APP_ROOT: $APP_ROOT"
+echo "Files in APP_ROOT: $(ls -la $APP_ROOT)"
+echo "Files in data directory: $(ls -la data)"
 echo "PORT: $PORT"
 echo "WEBSITES_PORT: $WEBSITES_PORT"
 echo "PYTHON_VERSION: $PYTHON_VERSION"
+echo "PYTHONPATH: $PYTHONPATH"
 
-# アプリケーションディレクトリに移動
-cd /home/site/wwwroot
-
-# Gunicornでアプリケーションを起動
+# アプリケーションの起動
 echo "Starting Gunicorn on port $PORT..."
 exec gunicorn \
     --bind=0.0.0.0:$PORT \
@@ -38,6 +47,6 @@ exec gunicorn \
     --workers 1 \
     --access-logfile - \
     --error-logfile - \
-    --log-level info \
+    --log-level debug \
     --capture-output \
-    app:app 
+    app:app
