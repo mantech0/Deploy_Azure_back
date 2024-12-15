@@ -1,0 +1,6 @@
+id,title,description,required_skills,location,duration,status
+1,Webアプリケーション開発,ECサイトのフルスタック開発,"React,Node.js,TypeScript",東京都,6ヶ月,募集中
+2,モバイルアプリ開発,iOSアプリの新規開発,"Swift,iOS,Firebase",大阪府,3ヶ月,募集中
+3,クラウドインフラ構築,AWSを用いたインフラ刷新プロジェクト,"AWS,Docker,Kubernetes",神奈川県,4ヶ月,募集中
+4,基幹システム更改,Java基幹システムのリプレイス,"Java,Spring Boot,Oracle",福岡県,12ヶ月,募集中
+5,AIチャットボット開発,自然言語処理を用いたチャットボット開発,"Python,TensorFlow,NLP",東京都,5ヶ月,募集中 
