@@ -1,15 +1,13 @@
 #!/bin/bash
 
+# エラーが発生したら即座に終了
+set -e
+
 # デバッグモードを有効化
 set -x
 
 echo "Starting deployment script..."
-echo "Python version:"
-python --version
-echo "Pip version:"
-pip --version
-
-echo "Current directory: $(pwd)"
+echo "Current working directory: $(pwd)"
 echo "Directory contents:"
 ls -la
 
@@ -18,16 +16,19 @@ echo "Creating data directory..."
 mkdir -p data
 chmod 755 data
 
-# CSVファイルのコピー
-echo "Copying CSV files..."
-if [ -d "/home/site/wwwroot/data" ]; then
-    echo "Source data directory exists"
-    ls -la /home/site/wwwroot/data/
-    cp -f /home/site/wwwroot/data/*.csv data/ || echo "Warning: CSV copy failed"
-else
-    echo "Warning: Source data directory not found at /home/site/wwwroot/data"
-    echo "Current directory structure:"
-    find /home/site/wwwroot -type d
+# CSVファイルの初期化
+echo "Initializing CSV files..."
+if [ ! -f "data/users.csv" ]; then
+    echo "id,name,email,skills,experience,prefecture" > data/users.csv
+    echo "Creating empty users.csv"
+fi
+if [ ! -f "data/projects.csv" ]; then
+    echo "id,title,description,required_skills,location,duration,status" > data/projects.csv
+    echo "Creating empty projects.csv"
+fi
+if [ ! -f "data/project_assignments.csv" ]; then
+    echo "id,project_id,user_id,assigned_date,status" > data/project_assignments.csv
+    echo "Creating empty project_assignments.csv"
 fi
 
 # ファイルの存在確認
@@ -36,7 +37,10 @@ ls -la data/
 
 # 依存関係のインストール
 echo "Installing dependencies..."
-pip install -r requirements.txt
+pip install -r requirements.txt || {
+    echo "Failed to install dependencies"
+    exit 1
+}
 
 # 環境変数の設定
 echo "Setting environment variables..."
@@ -55,47 +59,67 @@ echo "Starting application on port: $PORT"
 echo "Testing application import..."
 python -c "
 import sys
+print('Python version:', sys.version)
 print('Python path:', sys.path)
 import app
 print('Application imported successfully')
 print('App config:', app.app.config)
-" || exit 1
+" || {
+    echo "Failed to import application"
+    exit 1
+}
 
-echo "Testing application startup..."
-timeout 30s python -c "
-import sys
-print('Python path:', sys.path)
-from app import app
-print('Creating test client...')
-with app.test_client() as client:
-    print('Sending health check request...')
-    response = client.get('/health')
-    print(f'Health check response: {response.status_code}')
-    print(f'Response data: {response.data}')
-    if response.status_code != 200:
-        raise Exception('Health check failed')
-    print('Health check passed')
-" || exit 1
+# Gunicornの設定ファイルを作成
+echo "Creating Gunicorn config..."
+cat > gunicorn_config.py << EOL
+import multiprocessing
+import os
 
-# データディレクトリの権限を確認
-echo "Checking data directory permissions..."
-ls -la data/
+# Server socket
+bind = "0.0.0.0:" + os.getenv("PORT", "8000")
+backlog = 2048
+
+# Worker processes
+workers = 1
+worker_class = 'sync'
+threads = 1
+timeout = 120
+
+# Logging
+accesslog = '-'
+errorlog = '-'
+loglevel = 'debug'
+capture_output = True
+enable_stdio_inheritance = True
+
+# Process naming
+proc_name = 'skill-now-backend'
+
+# Server mechanics
+daemon = False
+pidfile = None
+umask = 0
+user = None
+group = None
+tmp_upload_dir = None
+
+# SSL
+keyfile = None
+certfile = None
+
+def on_starting(server):
+    print("Gunicorn is starting up...")
+
+def on_reload(server):
+    print("Gunicorn is reloading...")
+
+def when_ready(server):
+    print("Gunicorn is ready...")
+
+def on_exit(server):
+    print("Gunicorn is shutting down...")
+EOL
 
 # Gunicornでアプリケーションを起動
-echo "Starting Gunicorn..."
-exec gunicorn \
-    --bind=0.0.0.0:$PORT \
-    --timeout 600 \
-    --workers 1 \
-    --threads 2 \
-    --worker-class=gthread \
-    --access-logfile - \
-    --error-logfile - \
-    --log-level debug \
-    --capture-output \
-    --preload \
-    --worker-tmp-dir /dev/shm \
-    --graceful-timeout 120 \
-    --keep-alive 5 \
-    --max-requests 1000 \
-    app:app
+echo "Starting Gunicorn with config file..."
+exec gunicorn --config gunicorn_config.py app:app
