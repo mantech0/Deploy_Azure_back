@@ -7,7 +7,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 CORS(app, resources={
-    r"/api/*": {
+    r"/*": {
         "origins": ["https://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net"],
         "methods": ["GET", "POST", "PUT", "DELETE"],
         "allow_headers": ["Content-Type"]
