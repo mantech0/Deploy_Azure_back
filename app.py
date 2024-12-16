@@ -33,7 +33,7 @@ def read_users_from_csv():
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # スキルをリストに変換（カンマ区切りの文字列から）
+                # スキルをリストに変換（カンマ区切りの文字列か���）
                 skills = row.get('skills', '').split(',') if row.get('skills') else []
                 user = {
                     'id': int(row['id']),
@@ -127,7 +127,17 @@ def write_assignments_to_csv(assignments):
 
 @app.route('/')
 def home():
-    return jsonify({"message": "Welcome to SkillNow API"})
+    return jsonify({
+        "status": "healthy",
+        "message": "Welcome to SkillNow API"
+    }), 200
+
+@app.route('/health')
+def health_check():
+    return jsonify({
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat()
+    }), 200
 
 # ユーザー関連のエンドポイント
 @app.route('/api/users', methods=['GET'])

@@ -35,9 +35,21 @@ export FLASK_APP=app.py
 echo "Starting application on port: $PORT"
 
 # アプリケーションの起動確認
+echo "Testing application import..."
 python -c "import app; print('Application imported successfully')"
 
+echo "Testing application startup..."
+timeout 10s python -c "
+from app import app
+with app.test_client() as client:
+    response = client.get('/health')
+    if response.status_code != 200:
+        raise Exception('Health check failed')
+    print('Health check passed')
+"
+
 # Gunicornでアプリケーションを起動
+echo "Starting Gunicorn..."
 exec gunicorn \
     --bind=0.0.0.0:$PORT \
     --timeout 600 \
