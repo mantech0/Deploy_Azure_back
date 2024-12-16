@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python version
       uses: actions/setup-python@v2
       with:
-        python-version: '3.9'
+        python-version: '3.11'
 
     - name: Install dependencies
       run: |
@@ -26,20 +26,20 @@ jobs:
 
     - name: Prepare deployment package
       run: |
-        # 一時ディレクトリの作成
-        mkdir deploy
-        # 必要なファイルのコピー
-        cp app.py deploy/
-        cp requirements.txt deploy/
-        cp startup.sh deploy/
-        cp .deployment deploy/
-        mkdir -p deploy/data
-        cp data/*.csv deploy/data/ || true
+        # 基本ファイルの準備
+        mkdir -p data
+        touch data/users.csv data/projects.csv data/project_assignments.csv
+        
+        # CSVファイルの初期化
+        echo "id,name,email,skills,experience,prefecture" > data/users.csv
+        echo "id,title,description,required_skills,location,duration,status" > data/projects.csv
+        echo "id,project_id,user_id,assigned_date,status" > data/project_assignments.csv
+        
         # 実行権限の付与
-        chmod +x deploy/startup.sh
-        # パッケージの作成
-        cd deploy
-        zip -r ../package.zip *
+        chmod +x startup.sh
+        
+        # 直接zipを作成（deploy ディレクトリなし）
+        zip -r package.zip app.py requirements.txt startup.sh .deployment data/
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
