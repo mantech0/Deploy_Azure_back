@@ -37,9 +37,18 @@ jobs:
         echo "id,title,description,required_skills,location,duration,status" > data/projects.csv
         echo "id,project_id,user_id,assigned_date,status" > data/project_assignments.csv
 
+    - name: Prepare for deployment
+      run: |
+        chmod +x startup.sh
+        ls -la
+        echo "Current directory contents:"
+        ls -R
+
     - name: Create deployment package
       run: |
-        zip -r package.zip ./* -x "venv/*" ".git/*" ".github/*"
+        zip -r package.zip . -x "venv/*" ".git/*" ".github/*" "*.pyc" "__pycache__/*"
+        echo "Package contents:"
+        unzip -l package.zip
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
