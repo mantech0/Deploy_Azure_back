@@ -7,6 +7,15 @@ echo "Current directory: $(pwd)"
 echo "Directory contents:"
 ls -la
 
+# データディレクトリの作成
+mkdir -p data
+
+# CSVファイルの存在確認
+if [ ! -f "data/users.csv" ] || [ ! -f "data/projects.csv" ] || [ ! -f "data/project_assignments.csv" ]; then
+    echo "Copying CSV files..."
+    cp -r /home/site/wwwroot/data/* data/
+fi
+
 # 依存関係のインストール
 pip install -r requirements.txt
 
@@ -26,4 +35,5 @@ exec gunicorn \
     --access-logfile - \
     --error-logfile - \
     --log-level debug \
+    --reload \
     app:app
