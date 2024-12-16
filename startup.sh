@@ -53,19 +53,33 @@ echo "Starting application on port: $PORT"
 
 # アプリケーションの起動確認
 echo "Testing application import..."
-python -c "import app; print('Application imported successfully')" || exit 1
+python -c "
+import sys
+print('Python path:', sys.path)
+import app
+print('Application imported successfully')
+print('App config:', app.app.config)
+" || exit 1
 
 echo "Testing application startup..."
-timeout 10s python -c "
+timeout 30s python -c "
+import sys
+print('Python path:', sys.path)
 from app import app
+print('Creating test client...')
 with app.test_client() as client:
-    print('Creating test client...')
+    print('Sending health check request...')
     response = client.get('/health')
     print(f'Health check response: {response.status_code}')
+    print(f'Response data: {response.data}')
     if response.status_code != 200:
         raise Exception('Health check failed')
     print('Health check passed')
 " || exit 1
+
+# データディレクトリの権限を確認
+echo "Checking data directory permissions..."
+ls -la data/
 
 # Gunicornでアプリケーションを起動
 echo "Starting Gunicorn..."
@@ -79,4 +93,9 @@ exec gunicorn \
     --error-logfile - \
     --log-level debug \
     --capture-output \
+    --preload \
+    --worker-tmp-dir /dev/shm \
+    --graceful-timeout 120 \
+    --keep-alive 5 \
+    --max-requests 1000 \
     app:app
