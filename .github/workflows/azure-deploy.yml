@@ -39,11 +39,7 @@ jobs:
 
     - name: Create deployment package
       run: |
-        mkdir deployment
-        cp -r *.py *.sh requirements.txt data deployment/
-        chmod +x deployment/startup.sh
-        cd deployment
-        zip -r ../package.zip ./*
+        zip -r package.zip ./* -x "venv/*" ".git/*" ".github/*"
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
