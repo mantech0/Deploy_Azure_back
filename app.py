@@ -6,7 +6,13 @@ import os
 from datetime import datetime
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={
+    r"/api/*": {
+        "origins": ["https://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net"],
+        "methods": ["GET", "POST", "PUT", "DELETE"],
+        "allow_headers": ["Content-Type"]
+    }
+})
 
 # ポート設定を環境変数から取得するように変更
 import os
