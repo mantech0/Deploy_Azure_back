@@ -8,15 +8,19 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app, resources={
     r"/*": {
-        "origins": ["https://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net"],
-        "methods": ["GET", "POST", "PUT", "DELETE"],
-        "allow_headers": ["Content-Type"]
+        "origins": "*",
+        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        "allow_headers": ["Content-Type", "Authorization"]
     }
 })
 
 # ポート設定を環境変数から取得するように変更
 import os
 PORT = int(os.getenv('PORT', 8000))
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+os.makedirs(DATA_DIR, exist_ok=True)
 
 def read_users_from_csv():
     users = []
@@ -282,7 +286,7 @@ def get_project_assignments(project_id):
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-# ユーザーの担当プロジェクト情報を取得
+# ユーザーの担当プロジェクト情���を取得
 @app.route('/api/users/<int:user_id>/assignments', methods=['GET'])
 def get_user_assignments(user_id):
     assignments = read_assignments_from_csv()
@@ -332,7 +336,7 @@ def create_project_assignment(project_id):
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response, 201
 
-# プロジェクトの担当者を解除
+# プロジェクトの担当��を解除
 @app.route('/api/projects/<int:project_id>/assignments/<int:assignment_id>', methods=['DELETE'])
 def remove_assignment(project_id, assignment_id):
     assignments = read_assignments_from_csv()
