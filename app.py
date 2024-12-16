@@ -8,8 +8,9 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# ポート設定
-PORT = 5001
+# ポート設定を環境変数から取得するように変更
+import os
+PORT = int(os.getenv('PORT', 8000))
 
 def read_users_from_csv():
     users = []
@@ -345,5 +346,5 @@ if __name__ == '__main__':
     print(f'🚀 バックエンドサーバーが起動しました')
     print(f'📡 サーバーURL: http://localhost:{PORT}')
     print('----------------------------------------')
-    app.run(port=PORT, debug=True) 
+    app.run(host='0.0.0.0', port=PORT) 
     
