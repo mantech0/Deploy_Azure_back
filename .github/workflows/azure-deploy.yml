@@ -24,22 +24,9 @@ jobs:
         pip install -r requirements.txt
         pip install gunicorn gevent
 
-    - name: Prepare deployment package
+    - name: Create deployment package
       run: |
-        # 基本ファイルの準備
-        mkdir -p data
-        touch data/users.csv data/projects.csv data/project_assignments.csv
-        
-        # CSVファイルの初期化
-        echo "id,name,email,skills,experience,prefecture" > data/users.csv
-        echo "id,title,description,required_skills,location,duration,status" > data/projects.csv
-        echo "id,project_id,user_id,assigned_date,status" > data/project_assignments.csv
-        
-        # 実行権限の付与
-        chmod +x startup.sh
-        
-        # 直接zipを作成（deploy ディレクトリなし）
-        zip -r package.zip app.py requirements.txt startup.sh .deployment data/
+        zip -r package.zip ./* -x "venv/*" ".git/*" ".github/*"
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
