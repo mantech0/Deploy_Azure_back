@@ -8,10 +8,7 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app, resources={
     r"/*": {
-        "origins": [
-            "http://localhost:3000",
-            "https://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net"
-        ],
+        "origins": "*",
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
         "supports_credentials": True
@@ -33,7 +30,7 @@ def read_users_from_csv():
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # スキルをリストに変換（カンマ区切りの文字列か���）
+                # スキルをリストに変換（カンマ区切りの文字列か）
                 skills = row.get('skills', '').split(',') if row.get('skills') else []
                 user = {
                     'id': int(row['id']),
@@ -126,17 +123,16 @@ def write_assignments_to_csv(assignments):
             writer.writerow(assignment)
 
 @app.route('/')
-def home():
-    return jsonify({
-        "status": "healthy",
-        "message": "Welcome to SkillNow API"
-    }), 200
-
 @app.route('/health')
 def health_check():
     return jsonify({
         "status": "healthy",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
+        "env": {
+            "PORT": os.getenv('PORT'),
+            "WEBSITES_PORT": os.getenv('WEBSITES_PORT'),
+            "FLASK_ENV": os.getenv('FLASK_ENV')
+        }
     }), 200
 
 # ユーザー関連のエンドポイント
