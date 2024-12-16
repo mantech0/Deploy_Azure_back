@@ -25,18 +25,28 @@ jobs:
 
     - name: Install dependencies
       run: pip install -r requirements.txt
-        
-    - name: Create deployment artifact
+
+    - name: Create deployment package
       run: |
-        mkdir -p ../deployment
-        cp -r * ../deployment/
-        mv ../deployment ./deployment
+        # 必要なファイルのみをデプロイメントディレクトリにコピー
+        mkdir deployment
+        cp app.py deployment/
+        cp -r app deployment/
+        cp requirements.txt deployment/
+        cp startup.sh deployment/
+        cp -r data deployment/
+        cp .deployment deployment/
+        
+        # 権限の設定
+        chmod +x deployment/startup.sh
+        
+        # デプロイメントパッケージの作成
         cd deployment
-        rm -rf venv .git .github || true
+        zip -r ../package.zip ./*
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
       with:
         app-name: 'tech0-gen-8-step3-testapp-py2-26'
         publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-        package: deployment
+        package: package.zip
