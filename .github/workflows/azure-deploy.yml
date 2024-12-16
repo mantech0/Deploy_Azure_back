@@ -18,37 +18,28 @@ jobs:
       with:
         python-version: '3.9'
 
-    - name: Create and start virtual environment
-      run: |
-        python -m venv venv
-        source venv/bin/activate
-
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install gunicorn gevent
 
-    - name: Initialize data directory
+    - name: Prepare deployment package
       run: |
-        mkdir -p data
-        touch data/users.csv data/projects.csv data/project_assignments.csv
-        echo "id,name,email,skills,experience,prefecture" > data/users.csv
-        echo "id,title,description,required_skills,location,duration,status" > data/projects.csv
-        echo "id,project_id,user_id,assigned_date,status" > data/project_assignments.csv
-
-    - name: Prepare for deployment
-      run: |
-        chmod +x startup.sh
-        ls -la
-        echo "Current directory contents:"
-        ls -R
-
-    - name: Create deployment package
-      run: |
-        zip -r package.zip . -x "venv/*" ".git/*" ".github/*" "*.pyc" "__pycache__/*"
-        echo "Package contents:"
-        unzip -l package.zip
+        # 一時ディレクトリの作成
+        mkdir deploy
+        # 必要なファイルのコピー
+        cp app.py deploy/
+        cp requirements.txt deploy/
+        cp startup.sh deploy/
+        cp .deployment deploy/
+        mkdir -p deploy/data
+        cp data/*.csv deploy/data/ || true
+        # 実行権限の付与
+        chmod +x deploy/startup.sh
+        # パッケージの作成
+        cd deploy
+        zip -r ../package.zip *
 
     - name: Deploy to Azure Web App
       uses: azure/webapps-deploy@v2
