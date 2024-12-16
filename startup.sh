@@ -11,6 +11,18 @@ ls -la
 mkdir -p data
 chmod 755 data
 
+# CSVファイルのコピー
+echo "Copying CSV files..."
+if [ -d "/home/site/wwwroot/data" ]; then
+    cp -f /home/site/wwwroot/data/*.csv data/
+else
+    echo "Warning: Source data directory not found"
+fi
+
+# ファイルの存在確認
+echo "Checking CSV files..."
+ls -la data/
+
 # 依存関係のインストール
 pip install -r requirements.txt
 
