@@ -3,31 +3,36 @@
 # エラーが発生したら即座に終了
 set -e
 
-echo "Starting deployment script..."
+# ログファイルの設定
+LOG_FILE="/home/LogFiles/application.log"
+exec 1>>${LOG_FILE}
+exec 2>>${LOG_FILE}
+
+echo "$(date -u) - Starting deployment script..."
 echo "Current working directory: $(pwd)"
 echo "Directory contents:"
 ls -la
 
 # スクリプトの実行権限を確認
-echo "Checking script permissions..."
+echo "$(date -u) - Checking script permissions..."
 chmod +x "$(dirname "$0")/startup.sh"
 
 # Pythonのバージョンを確認
-echo "Python version:"
+echo "$(date -u) - Python version:"
 python --version
 which python
 
 # 環境変数を確認
-echo "Environment variables:"
+echo "$(date -u) - Environment variables:"
 env | sort
 
 # データディレクトリの作成と権限設定
-echo "Creating data directory..."
+echo "$(date -u) - Creating data directory..."
 mkdir -p data
 chmod 755 data
 
 # CSVファイルの初期化
-echo "Initializing CSV files..."
+echo "$(date -u) - Initializing CSV files..."
 if [ ! -f "data/users.csv" ]; then
     echo "id,name,email,skills,experience,prefecture" > data/users.csv
     echo "Creating empty users.csv"
@@ -42,11 +47,11 @@ if [ ! -f "data/project_assignments.csv" ]; then
 fi
 
 # 依存関係のインストール
-echo "Installing dependencies..."
+echo "$(date -u) - Installing dependencies..."
 python -m pip install --upgrade pip
 pip install --no-cache-dir -r requirements.txt
 
-echo "Installed Python packages:"
+echo "$(date -u) - Installed Python packages:"
 pip list
 
 # 環境変数の設定
@@ -57,10 +62,10 @@ export FLASK_ENV=production
 export PYTHONUNBUFFERED=1
 export PYTHONPATH=/home/site/wwwroot
 
-echo "Current environment:"
+echo "$(date -u) - Current environment:"
 env | grep -E 'PORT|FLASK|PYTHON|WEBSITE'
 
-echo "Testing Flask application..."
+echo "$(date -u) - Testing Flask application..."
 python -c "
 import flask
 import werkzeug
@@ -71,7 +76,7 @@ print('Flask routes:')
 for rule in app.url_map.iter_rules():
     print(f'  {rule}')"
 
-echo "Starting Gunicorn..."
+echo "$(date -u) - Starting Gunicorn..."
 cd "$(dirname "$0")"
 exec gunicorn \
     --bind=0.0.0.0:8000 \
@@ -79,8 +84,8 @@ exec gunicorn \
     --threads=2 \
     --timeout=120 \
     --log-level=debug \
-    --access-logfile=- \
-    --error-logfile=- \
+    --access-logfile=/home/LogFiles/gunicorn_access.log \
+    --error-logfile=/home/LogFiles/gunicorn_error.log \
     --capture-output \
     --enable-stdio-inheritance \
     --reload \
