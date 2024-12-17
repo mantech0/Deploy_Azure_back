@@ -79,16 +79,16 @@ for rule in app.url_map.iter_rules():
 echo "$(date -u) - Starting Gunicorn..."
 cd "$(dirname "$0")"
 
-# 環境変数の確認
+# 環境変数の確認と出力
 echo "Current environment variables:"
 echo "PORT: $PORT"
 echo "WEBSITES_PORT: $WEBSITES_PORT"
 echo "FLASK_APP: $FLASK_APP"
 echo "FLASK_ENV: $FLASK_ENV"
 
-# Gunicornの起動
+# Gunicornの起動（ポート番号を直接指定）
 exec gunicorn \
-    --bind=0.0.0.0:${PORT:-8181} \
+    --bind=0.0.0.0:8181 \
     --workers=2 \
     --threads=4 \
     --timeout=120 \
