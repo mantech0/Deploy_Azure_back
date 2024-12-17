@@ -6,17 +6,20 @@ import os
 from datetime import datetime
 
 app = Flask(__name__)
+
+# CORSの設定
+FRONTEND_URL = "https://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net"
 CORS(app, resources={
     r"/*": {
-        "origins": "*",
+        "origins": [FRONTEND_URL, "http://localhost:3000"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
         "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True
+        "supports_credentials": True,
+        "expose_headers": ["Content-Type", "Authorization"]
     }
 })
 
-# ポート設定を環境変数から取得するように変更
-import os
+# ポート設定を環境変数から取得
 PORT = int(os.getenv('PORT', 8000))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -30,7 +33,7 @@ def read_users_from_csv():
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # スキルをリストに変換（カンマ区切りの文字列か）
+                # スキルをリス��に変換（カンマ区切りの文字列か）
                 skills = row.get('skills', '').split(',') if row.get('skills') else []
                 user = {
                     'id': int(row['id']),
@@ -88,7 +91,7 @@ def write_projects_to_csv(projects):
         writer = csv.DictWriter(file, fieldnames=['id', 'title', 'description', 'required_skills', 'location', 'duration', 'status'])
         writer.writeheader()
         for project in projects:
-            # スキルをカンマ区切りの文字列に変換
+            # スキ��をカンマ区切りの文字列に変換
             project_copy = project.copy()
             project_copy['required_skills'] = ','.join(project_copy['required_skills'])
             writer.writerow(project_copy)
@@ -126,14 +129,16 @@ def write_assignments_to_csv(assignments):
 @app.route('/health')
 def health_check():
     return jsonify({
-        "status": "healthy",
+        "message": "Welcome to SkillNow API",
+        "status": "running",
         "timestamp": datetime.now().isoformat(),
         "env": {
             "PORT": os.getenv('PORT'),
             "WEBSITES_PORT": os.getenv('WEBSITES_PORT'),
-            "FLASK_ENV": os.getenv('FLASK_ENV')
+            "FLASK_ENV": os.getenv('FLASK_ENV'),
+            "FRONTEND_URL": FRONTEND_URL
         }
-    }), 200
+    })
 
 # ユーザー関連のエンドポイント
 @app.route('/api/users', methods=['GET'])
