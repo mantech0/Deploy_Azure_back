@@ -8,6 +8,19 @@ echo "Current working directory: $(pwd)"
 echo "Directory contents:"
 ls -la
 
+# スクリプトの実行権限を確認
+echo "Checking script permissions..."
+chmod +x "$(dirname "$0")/startup.sh"
+
+# Pythonのバージョンを確認
+echo "Python version:"
+python --version
+which python
+
+# 環境変数を確認
+echo "Environment variables:"
+env | sort
+
 # データディレクトリの作成と権限設定
 echo "Creating data directory..."
 mkdir -p data
@@ -58,6 +71,7 @@ for rule in app.app.url_map.iter_rules():
     print(f'  {rule}')"
 
 echo "Starting Gunicorn..."
+cd "$(dirname "$0")"
 exec gunicorn \
     --bind=0.0.0.0:8000 \
     --workers=1 \
@@ -68,4 +82,5 @@ exec gunicorn \
     --error-logfile=- \
     --capture-output \
     --enable-stdio-inheritance \
+    --reload \
     app:app
