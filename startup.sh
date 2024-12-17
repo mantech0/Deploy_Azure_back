@@ -52,7 +52,7 @@ pip list
 # 環境変数の設定
 export PORT=8000
 export WEBSITES_PORT=8000
-export FLASK_APP=run.py
+export FLASK_APP=app
 export FLASK_ENV=production
 export PYTHONUNBUFFERED=1
 export PYTHONPATH=/home/site/wwwroot
@@ -66,7 +66,7 @@ import flask
 import werkzeug
 print(f'Flask version: {flask.__version__}')
 print(f'Werkzeug version: {werkzeug.__version__}')
-from run import app
+from app import app
 print('Flask routes:')
 for rule in app.url_map.iter_rules():
     print(f'  {rule}')"
@@ -84,4 +84,4 @@ exec gunicorn \
     --capture-output \
     --enable-stdio-inheritance \
     --reload \
-    run:app
+    app:app
