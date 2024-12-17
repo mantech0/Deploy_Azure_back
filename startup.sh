@@ -52,9 +52,10 @@ pip list
 # 環境変数の設定
 export PORT=8000
 export WEBSITES_PORT=8000
-export FLASK_APP=app.py
+export FLASK_APP=run.py
 export FLASK_ENV=production
 export PYTHONUNBUFFERED=1
+export PYTHONPATH=/home/site/wwwroot
 
 echo "Current environment:"
 env | grep -E 'PORT|FLASK|PYTHON|WEBSITE'
@@ -65,9 +66,9 @@ import flask
 import werkzeug
 print(f'Flask version: {flask.__version__}')
 print(f'Werkzeug version: {werkzeug.__version__}')
-import app
+from run import app
 print('Flask routes:')
-for rule in app.app.url_map.iter_rules():
+for rule in app.url_map.iter_rules():
     print(f'  {rule}')"
 
 echo "Starting Gunicorn..."
@@ -83,4 +84,4 @@ exec gunicorn \
     --capture-output \
     --enable-stdio-inheritance \
     --reload \
-    app:app
+    run:app
