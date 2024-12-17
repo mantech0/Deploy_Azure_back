@@ -30,8 +30,11 @@ fi
 
 # 依存関係のインストール
 echo "Installing dependencies..."
-pip install -r requirements.txt
-pip install gunicorn
+python -m pip install --upgrade pip
+pip install --no-cache-dir -r requirements.txt
+
+echo "Installed Python packages:"
+pip list
 
 # 環境変数の設定
 export PORT=8000
@@ -45,6 +48,10 @@ env | grep -E 'PORT|FLASK|PYTHON|WEBSITE'
 
 echo "Testing Flask application..."
 python -c "
+import flask
+import werkzeug
+print(f'Flask version: {flask.__version__}')
+print(f'Werkzeug version: {werkzeug.__version__}')
 import app
 print('Flask routes:')
 for rule in app.app.url_map.iter_rules():
