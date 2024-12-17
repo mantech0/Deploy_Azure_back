@@ -31,12 +31,34 @@ fi
 # 依存関係のインストール
 echo "Installing dependencies..."
 pip install -r requirements.txt
+pip install gunicorn
 
 # 環境変数の設定
 export PORT=8000
 export WEBSITES_PORT=8000
 export FLASK_APP=app.py
 export FLASK_ENV=production
+export PYTHONUNBUFFERED=1
+
+echo "Current environment:"
+env | grep -E 'PORT|FLASK|PYTHON|WEBSITE'
+
+echo "Testing Flask application..."
+python -c "
+import app
+print('Flask routes:')
+for rule in app.app.url_map.iter_rules():
+    print(f'  {rule}')"
 
 echo "Starting Gunicorn..."
-exec gunicorn --bind=0.0.0.0:8000 --timeout 600 --access-logfile '-' --error-logfile '-' --log-level debug app:app
+exec gunicorn \
+    --bind=0.0.0.0:8000 \
+    --workers=1 \
+    --threads=2 \
+    --timeout=120 \
+    --log-level=debug \
+    --access-logfile=- \
+    --error-logfile=- \
+    --capture-output \
+    --enable-stdio-inheritance \
+    app:app
