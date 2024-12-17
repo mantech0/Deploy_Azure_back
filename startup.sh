@@ -55,8 +55,8 @@ echo "$(date -u) - Installed Python packages:"
 pip list
 
 # 環境変数の設定
-export PORT=8000
-export WEBSITES_PORT=8000
+export PORT=8181
+export WEBSITES_PORT=8181
 export FLASK_APP=app
 export FLASK_ENV=production
 export PYTHONUNBUFFERED=1
@@ -79,7 +79,7 @@ for rule in app.url_map.iter_rules():
 echo "$(date -u) - Starting Gunicorn..."
 cd "$(dirname "$0")"
 exec gunicorn \
-    --bind=0.0.0.0:8000 \
+    --bind=0.0.0.0:8181 \
     --workers=1 \
     --threads=2 \
     --timeout=120 \

@@ -20,7 +20,7 @@ CORS(app, resources={
 })
 
 # ポート設定を環境変数から取得
-PORT = int(os.getenv('PORT', 8000))
+PORT = int(os.getenv('PORT', 8181))
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
@@ -33,7 +33,7 @@ def read_users_from_csv():
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # スキルをリス��に変換（カンマ区切りの文字列か）
+                # スキルをリストに変換（カンマ区切りの文字列か）
                 skills = row.get('skills', '').split(',') if row.get('skills') else []
                 user = {
                     'id': int(row['id']),
@@ -91,7 +91,7 @@ def write_projects_to_csv(projects):
         writer = csv.DictWriter(file, fieldnames=['id', 'title', 'description', 'required_skills', 'location', 'duration', 'status'])
         writer.writeheader()
         for project in projects:
-            # スキ��をカンマ区切りの文字列に変換
+            # スキルをカンマ区切りの文字列に変換
             project_copy = project.copy()
             project_copy['required_skills'] = ','.join(project_copy['required_skills'])
             writer.writerow(project_copy)
@@ -332,7 +332,7 @@ def create_project_assignment(project_id):
     # 既存の割り当てをチェック
     existing = next((a for a in assignments if a['project_id'] == project_id and a['user_id'] == user_id), None)
     if existing:
-        return jsonify({"error": "既に割り当てられています"}), 400
+        return jsonify({"error": "既に割���当てられています"}), 400
     
     # 新しい割り当てを作成
     new_id = max([a['id'] for a in assignments], default=0) + 1
