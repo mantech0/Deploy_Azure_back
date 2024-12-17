@@ -33,7 +33,7 @@ def read_users_from_csv():
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # スキルをリストに変換（カンマ区切りの文字列か）
+                # スキルをリ���トに変換（カンマ区切りの文字列か）
                 skills = row.get('skills', '').split(',') if row.get('skills') else []
                 user = {
                     'id': int(row['id']),
@@ -369,8 +369,9 @@ def remove_assignment(project_id, assignment_id):
 if __name__ == '__main__':
     print('----------------------------------------')
     print(f'🚀 バックエンドサーバーが起動しました')
-    print(f'📡 サーバーURL: http://localhost:{PORT}')
+    port = int(os.getenv('PORT', 8181))
+    print(f'📡 サーバーURL: http://localhost:{port}')
     print('----------------------------------------')
-    app.run(host='0.0.0.0', port=PORT) 
+    app.run(host='0.0.0.0', port=port) 
     
     

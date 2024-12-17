@@ -56,31 +56,22 @@ pip list
 # 環境変数の設定
 export PORT=8181
 export WEBSITES_PORT=8181
+export GUNICORN_CMD_ARGS="--bind=0.0.0.0:8181 --workers=2 --threads=4 --timeout=120 --log-level=debug"
 export FLASK_APP=app
 export FLASK_ENV=production
 export PYTHONUNBUFFERED=1
 export PYTHONPATH=/home/site/wwwroot
 
 echo "$(date -u) - Current environment:"
-env | grep -E 'PORT|FLASK|PYTHON|WEBSITE'
+env | grep -E 'PORT|FLASK|PYTHON|WEBSITE|GUNICORN'
 
 echo "$(date -u) - Starting Gunicorn..."
 
 # Gunicornの起動（デバッグ情報を追加）
 echo "Starting Gunicorn with the following configuration:"
-echo "Port: 8181"
+echo "Port: $PORT"
 echo "Working Directory: $(pwd)"
 echo "Python Path: $PYTHONPATH"
+echo "Gunicorn Args: $GUNICORN_CMD_ARGS"
 
-exec gunicorn \
-    --bind=0.0.0.0:8181 \
-    --workers=2 \
-    --threads=4 \
-    --timeout=120 \
-    --log-level=debug \
-    --access-logfile=/home/LogFiles/gunicorn_access.log \
-    --error-logfile=/home/LogFiles/gunicorn_error.log \
-    --capture-output \
-    --enable-stdio-inheritance \
-    --chdir /home/site/wwwroot \
-    app:app
+exec gunicorn app:app
