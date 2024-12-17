@@ -78,15 +78,23 @@ for rule in app.url_map.iter_rules():
 
 echo "$(date -u) - Starting Gunicorn..."
 cd "$(dirname "$0")"
+
+# 環境変数の確認
+echo "Current environment variables:"
+echo "PORT: $PORT"
+echo "WEBSITES_PORT: $WEBSITES_PORT"
+echo "FLASK_APP: $FLASK_APP"
+echo "FLASK_ENV: $FLASK_ENV"
+
+# Gunicornの起動
 exec gunicorn \
-    --bind=0.0.0.0:8181 \
-    --workers=1 \
-    --threads=2 \
+    --bind=0.0.0.0:${PORT:-8181} \
+    --workers=2 \
+    --threads=4 \
     --timeout=120 \
     --log-level=debug \
     --access-logfile=/home/LogFiles/gunicorn_access.log \
     --error-logfile=/home/LogFiles/gunicorn_error.log \
     --capture-output \
     --enable-stdio-inheritance \
-    --reload \
     app:app
