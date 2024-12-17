@@ -17,10 +17,11 @@ CORS(app, resources={
     }
 })
 
-# ルートの登録
-app.register_blueprint(users_bp)
+# ルートの登録（/apiプレフィックスを追加）
+app.register_blueprint(users_bp, url_prefix='/api')
 
 @app.route('/')
+@app.route('/health')
 def index():
     try:
         return jsonify({
