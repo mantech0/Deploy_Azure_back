@@ -20,7 +20,7 @@ CORS(app, resources={
 })
 
 # ポート設定を環境変数から取得
-PORT = int(os.getenv('PORT', 8181))
+PORT = 8181  # 固定値として設定
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
@@ -51,7 +51,7 @@ def read_users_from_csv():
 
 def write_users_to_csv(users):
     csv_path = os.path.join(os.path.dirname(__file__), 'data', 'users.csv')
-    os.makedirs(os.path.dirname(csv_path), exist_ok=True)  # データディレクトリがない場合は作成
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)  # データディレクトリがない場合���作成
     with open(csv_path, 'w', encoding='utf-8', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=['id', 'name', 'email', 'skills', 'experience', 'prefecture'])
         writer.writeheader()
@@ -332,7 +332,7 @@ def create_project_assignment(project_id):
     # 既存の割り当てをチェック
     existing = next((a for a in assignments if a['project_id'] == project_id and a['user_id'] == user_id), None)
     if existing:
-        return jsonify({"error": "既に割���当てられています"}), 400
+        return jsonify({"error": "既に割り当てられています"}), 400
     
     # 新しい割り当てを作成
     new_id = max([a['id'] for a in assignments], default=0) + 1
