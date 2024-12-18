@@ -32,7 +32,7 @@ def read_users_from_csv():
             reader = csv.DictReader(file)
             for row in reader:
                 try:
-                    # スキルをリストに変換（カンマ区切りの文字列か）
+                    # スキルをリストに変換（���ンマ区切りの文字列か）
                     skills = row.get('skills', '').split(',') if row.get('skills') else []
                     user = {
                         'id': int(row.get('id', 0)),
@@ -205,7 +205,9 @@ def not_found_error(error):
 # ユーザー関連のエンドポイント
 @api.route('/users', methods=['GET'])
 def get_users():
+    print(f"Loading users from: {os.path.join(os.path.dirname(__file__), 'data', 'users.csv')}")
     users = read_users_from_csv()
+    print(f"Loaded {len(users)} users")
     response = make_response(json.dumps(users, ensure_ascii=False))
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
@@ -252,7 +254,9 @@ def get_users():
 # プロジェクト関連のエンドポイント
 @api.route('/projects', methods=['GET'])
 def get_projects():
+    print(f"Loading projects from: {os.path.join(os.path.dirname(__file__), 'data', 'projects.csv')}")
     projects = read_projects_from_csv()
+    print(f"Loaded {len(projects)} projects")
     response = make_response(json.dumps(projects, ensure_ascii=False))
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response

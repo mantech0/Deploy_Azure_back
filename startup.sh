@@ -54,8 +54,8 @@ echo "$(date -u) - Installed Python packages:"
 pip list
 
 # 環境変数の設定
-export PORT=8000
-export WEBSITES_PORT=8000
+export PORT=8181
+export WEBSITES_PORT=8181
 export FLASK_APP=app
 export FLASK_ENV=production
 export PYTHONUNBUFFERED=1
@@ -73,7 +73,7 @@ sleep 2
 
 # Gunicornの設定ファイルを作成
 cat > gunicorn.conf.py << EOL
-bind = "0.0.0.0:8000"
+bind = "0.0.0.0:8181"
 workers = 2
 threads = 2
 timeout = 120
@@ -97,4 +97,11 @@ if [ ! -f "app.py" ]; then
 fi
 
 echo "Starting Gunicorn with config file..."
+echo "Current directory contents:"
+ls -la
+
+# データディレクトリの確認
+echo "Data directory contents:"
+ls -la data/
+
 exec gunicorn -c gunicorn.conf.py app:app
