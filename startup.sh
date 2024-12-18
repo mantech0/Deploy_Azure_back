@@ -16,15 +16,6 @@ echo "Current working directory: $(pwd)"
 echo "Directory contents:"
 ls -la
 
-# スクリプトの実行権限を確認
-echo "$(date -u) - Checking script permissions..."
-chmod +x startup.sh
-
-# Pythonのバージョンを確認
-echo "$(date -u) - Python version:"
-python --version
-which python
-
 # データディレクトリの作成と権限設定
 echo "$(date -u) - Creating data directory..."
 mkdir -p data
@@ -53,33 +44,9 @@ pip install --no-cache-dir -r requirements.txt
 echo "$(date -u) - Installed Python packages:"
 pip list
 
-# 環境変数の設定
-export PORT=8181
-export WEBSITES_PORT=8181
-export FLASK_APP=app
-export FLASK_ENV=production
-export PYTHONUNBUFFERED=1
-export PYTHONPATH=/home/site/wwwroot
+echo "$(date -u) - Starting application..."
 
-echo "$(date -u) - Current environment:"
-env | grep -E 'PORT|FLASK|PYTHON|WEBSITE'
-
-echo "$(date -u) - Starting Gunicorn..."
-
-# プロセスの確認と終了
-echo "Checking for existing Gunicorn processes..."
-pkill gunicorn || true
-sleep 2
-
-echo "Starting Gunicorn..."
-echo "Current directory contents:"
-ls -la
-
-# データディレクトリの確認
-echo "Data directory contents:"
-ls -la data/
-
-# 直接ポートを指定してGunicornを起動
+# 直接Gunicornを起動（環境変数は使用せず）
 exec gunicorn \
     --bind=0.0.0.0:8181 \
     --workers=2 \
@@ -88,6 +55,4 @@ exec gunicorn \
     --log-level=debug \
     --access-logfile=/home/LogFiles/gunicorn_access.log \
     --error-logfile=/home/LogFiles/gunicorn_error.log \
-    --capture-output \
-    --preload \
     app:app

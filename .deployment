@@ -1,3 +1,5 @@
 [config]
 command = gunicorn --bind=0.0.0.0:8181 --workers=2 --threads=4 --timeout=120 --log-level=debug app:app
-SCM_DO_BUILD_DURING_DEPLOYMENT=true 
+SCM_DO_BUILD_DURING_DEPLOYMENT=true
+POST_BUILD_COMMAND=chmod +x startup.sh
+STARTUP_COMMAND=./startup.sh 
