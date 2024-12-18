@@ -71,32 +71,7 @@ echo "Checking for existing Gunicorn processes..."
 pkill gunicorn || true
 sleep 2
 
-# Gunicornの設定ファイルを作成
-cat > gunicorn.conf.py << EOL
-bind = "0.0.0.0:8181"
-workers = 2
-threads = 2
-timeout = 120
-loglevel = "debug"
-errorlog = "/home/LogFiles/gunicorn_error.log"
-accesslog = "/home/LogFiles/gunicorn_access.log"
-capture_output = True
-preload_app = True
-worker_class = "gthread"
-worker_tmp_dir = "/dev/shm"
-EOL
-
-echo "Created Gunicorn config file:"
-cat gunicorn.conf.py
-
-# アプリケーションの存在確認
-if [ ! -f "app.py" ]; then
-    echo "Error: app.py not found in $(pwd)"
-    ls -la
-    exit 1
-fi
-
-echo "Starting Gunicorn with config file..."
+echo "Starting Gunicorn..."
 echo "Current directory contents:"
 ls -la
 
@@ -104,4 +79,15 @@ ls -la
 echo "Data directory contents:"
 ls -la data/
 
-exec gunicorn -c gunicorn.conf.py app:app
+# 直接ポートを指定してGunicornを起動
+exec gunicorn \
+    --bind=0.0.0.0:8181 \
+    --workers=2 \
+    --threads=2 \
+    --timeout=120 \
+    --log-level=debug \
+    --access-logfile=/home/LogFiles/gunicorn_access.log \
+    --error-logfile=/home/LogFiles/gunicorn_error.log \
+    --capture-output \
+    --preload \
+    app:app
