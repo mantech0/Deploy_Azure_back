@@ -54,8 +54,8 @@ echo "$(date -u) - Installed Python packages:"
 pip list
 
 # 環境変数の設定
-export PORT=8181
-export WEBSITES_PORT=8181
+export PORT=8000
+export WEBSITES_PORT=8000
 export FLASK_APP=app
 export FLASK_ENV=production
 export PYTHONUNBUFFERED=1
@@ -71,11 +71,23 @@ echo "Checking for existing Gunicorn processes..."
 pkill gunicorn || true
 sleep 2
 
-# Gunicornの起動（デバッグ情報を追加）
-echo "Starting Gunicorn with the following configuration:"
-echo "Port: 8181"
-echo "Working Directory: $(pwd)"
-echo "Python Path: $PYTHONPATH"
+# Gunicornの設定ファイルを作成
+cat > gunicorn.conf.py << EOL
+bind = "0.0.0.0:8000"
+workers = 2
+threads = 2
+timeout = 120
+loglevel = "debug"
+errorlog = "/home/LogFiles/gunicorn_error.log"
+accesslog = "/home/LogFiles/gunicorn_access.log"
+capture_output = True
+preload_app = True
+worker_class = "gthread"
+worker_tmp_dir = "/dev/shm"
+EOL
+
+echo "Created Gunicorn config file:"
+cat gunicorn.conf.py
 
 # アプリケーションの存在確認
 if [ ! -f "app.py" ]; then
@@ -84,24 +96,5 @@ if [ ! -f "app.py" ]; then
     exit 1
 fi
 
-# Gunicornワーカーの数を設定
-WORKER_COUNT=2
-THREAD_COUNT=2
-
-echo "Worker Count: $WORKER_COUNT"
-echo "Thread Count: $THREAD_COUNT"
-
-# Gunicornを起動
-exec gunicorn \
-    --bind=0.0.0.0:8181 \
-    --workers=$WORKER_COUNT \
-    --threads=$THREAD_COUNT \
-    --timeout=120 \
-    --log-level=debug \
-    --error-logfile=/home/LogFiles/gunicorn_error.log \
-    --access-logfile=/home/LogFiles/gunicorn_access.log \
-    --capture-output \
-    --preload \
-    --worker-class=gthread \
-    --worker-tmp-dir=/dev/shm \
-    app:app
+echo "Starting Gunicorn with config file..."
+exec gunicorn -c gunicorn.conf.py app:app

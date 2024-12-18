@@ -403,11 +403,11 @@ def remove_assignment(project_id, assignment_id):
     return jsonify({"message": "割り当てを解除しました", "assignment": removed})
 
 if __name__ == '__main__':
+    port = int(os.getenv('PORT', 8000))
     print('----------------------------------------')
     print(f'🚀 バックエンドサーバーが起動しました')
-    port = int(os.getenv('PORT', 8181))
-    print(f'📡 サーバーURL: http://localhost:{port}')
+    print(f'📡 サーバーURL: http://0.0.0.0:{port}')
     print('----------------------------------------')
-    app.run(host='0.0.0.0', port=port) 
+    app.run(host='0.0.0.0', port=port, debug=False) 
     
     
