@@ -32,7 +32,7 @@ def read_users_from_csv():
             reader = csv.DictReader(file)
             for row in reader:
                 try:
-                    # スキルをリストに変換（���ンマ区切りの文字列か）
+                    # スキルをリストに変換（�����ンマ区切りの文字列か）
                     skills = row.get('skills', '').split(',') if row.get('skills') else []
                     user = {
                         'id': int(row.get('id', 0)),
@@ -252,24 +252,30 @@ def get_users():
     return response
 
 # プロジェクト関連のエンドポイント
-@api.route('/projects', methods=['GET'])
+@api.route('/api/projects', methods=['GET'])
 def get_projects():
-    print(f"Loading projects from: {os.path.join(os.path.dirname(__file__), 'data', 'projects.csv')}")
-    projects = read_projects_from_csv()
-    print(f"Loaded {len(projects)} projects")
-    response = make_response(json.dumps(projects, ensure_ascii=False))
-    response.headers['Content-Type'] = 'application/json; charset=utf-8'
-    return response
+    try:
+        print(f"Loading projects from: {os.path.join(os.path.dirname(__file__), 'data', 'projects.csv')}")
+        projects = read_projects_from_csv()
+        print(f"Loaded {len(projects)} projects")
+        response = make_response(json.dumps(projects, ensure_ascii=False))
+        response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        return response
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
-@api.route('/projects/<int:project_id>', methods=['GET'])
+@api.route('/api/projects/<int:project_id>', methods=['GET'])
 def get_project(project_id):
-    projects = read_projects_from_csv()
-    project = next((project for project in projects if project["id"] == project_id), None)
-    if project is None:
-        return jsonify({"error": "案件が見つかりません"}), 404
-    response = make_response(json.dumps(project, ensure_ascii=False))
-    response.headers['Content-Type'] = 'application/json; charset=utf-8'
-    return response
+    try:
+        projects = read_projects_from_csv()
+        project = next((project for project in projects if project["id"] == project_id), None)
+        if project is None:
+            return jsonify({"error": "案件が見つかりません"}), 404
+        response = make_response(json.dumps(project, ensure_ascii=False))
+        response.headers['Content-Type'] = 'application/json; charset=utf-8'
+        return response
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @api.route('/projects/<int:project_id>', methods=['PUT'])
 def update_project(project_id):

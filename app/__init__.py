@@ -17,8 +17,8 @@ CORS(app, resources={
     }
 })
 
-# ルートの登録（/apiプレフィックスを追加）
-app.register_blueprint(users_bp, url_prefix='/api')
+# ルートの登録（/apiプレフィックスなし）
+app.register_blueprint(users_bp)
 
 @app.route('/')
 @app.route('/health')

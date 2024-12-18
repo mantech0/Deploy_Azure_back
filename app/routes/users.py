@@ -2,7 +2,7 @@ import csv
 import os
 from flask import Blueprint, jsonify
 
-users_bp = Blueprint('users', __name__)
+users_bp = Blueprint('users', __name__, url_prefix='/api')
 
 def load_users():
     users = []
@@ -27,7 +27,7 @@ def load_users():
         print(f"Error loading users: {str(e)}")
         return []
 
-@users_bp.route('/')
+@users_bp.route('/users')
 def get_users():
     try:
         users = load_users()
@@ -35,11 +35,11 @@ def get_users():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@users_bp.route('/<user_id>')
+@users_bp.route('/users/<int:user_id>')
 def get_user(user_id):
     try:
         users = load_users()
-        user = next((user for user in users if user['id'] == int(user_id)), None)
+        user = next((user for user in users if user['id'] == user_id), None)
         if user:
             return jsonify(user)
         return jsonify({"error": "User not found"}), 404
