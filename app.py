@@ -30,33 +30,45 @@ def read_users_from_csv():
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # スキルをリストに変換（カンマ区切りの文字列か）
-                skills = row.get('skills', '').split(',') if row.get('skills') else []
-                user = {
-                    'id': int(row['id']),
-                    'name': row['name'],
-                    'email': row['email'],
-                    'skills': [skill.strip() for skill in skills],
-                    'experience': row['experience'],
-                    'prefecture': row['prefecture']
-                }
-                users.append(user)
+                try:
+                    # スキルをリストに変換（カンマ区切りの文字列か）
+                    skills = row.get('skills', '').split(',') if row.get('skills') else []
+                    user = {
+                        'id': int(row.get('id', 0)),
+                        'name': row.get('name', ''),
+                        'email': row.get('email', ''),
+                        'skills': [skill.strip() for skill in skills],
+                        'experience': row.get('experience', ''),
+                        'prefecture': row.get('prefecture', '')
+                    }
+                    users.append(user)
+                except (ValueError, KeyError) as e:
+                    print(f"Warning: Skipping invalid user row: {row}, Error: {str(e)}")
+                    continue
     except FileNotFoundError:
-        print(f"Warning: {csv_path} not found")
+        print(f"Warning: {csv_path} not found, creating new file")
+        # 空のCSVファイルを作成
+        write_users_to_csv([])
+    except Exception as e:
+        print(f"Error reading users CSV: {str(e)}")
         return []
     return users
 
 def write_users_to_csv(users):
     csv_path = os.path.join(os.path.dirname(__file__), 'data', 'users.csv')
-    os.makedirs(os.path.dirname(csv_path), exist_ok=True)  # データディレクトリがない場合作成
-    with open(csv_path, 'w', encoding='utf-8', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=['id', 'name', 'email', 'skills', 'experience', 'prefecture'])
-        writer.writeheader()
-        for user in users:
-            # スキルをカンマ区切りの文字列に変換
-            user_copy = user.copy()
-            user_copy['skills'] = ','.join(user_copy['skills'])
-            writer.writerow(user_copy)
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+    try:
+        with open(csv_path, 'w', encoding='utf-8', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=['id', 'name', 'email', 'skills', 'experience', 'prefecture'])
+            writer.writeheader()
+            for user in users:
+                # スキルをカンマ区切りの文字列に変換
+                user_copy = user.copy()
+                user_copy['skills'] = ','.join(str(s) for s in user_copy.get('skills', []))
+                writer.writerow(user_copy)
+    except Exception as e:
+        print(f"Error writing users CSV: {str(e)}")
+        raise
 
 def read_projects_from_csv():
     projects = []
@@ -65,33 +77,46 @@ def read_projects_from_csv():
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # スキルをリストに変換
-                required_skills = row.get('required_skills', '').split(',') if row.get('required_skills') else []
-                project = {
-                    'id': int(row['id']),
-                    'title': row['title'],
-                    'description': row['description'],
-                    'required_skills': [skill.strip() for skill in required_skills],
-                    'location': row['location'],
-                    'duration': row['duration'],
-                    'status': row['status']
-                }
-                projects.append(project)
+                try:
+                    # スキルをリストに変換
+                    required_skills = row.get('required_skills', '').split(',') if row.get('required_skills') else []
+                    project = {
+                        'id': int(row.get('id', 0)),
+                        'title': row.get('title', ''),
+                        'description': row.get('description', ''),
+                        'required_skills': [skill.strip() for skill in required_skills],
+                        'location': row.get('location', ''),
+                        'duration': row.get('duration', ''),
+                        'status': row.get('status', '')
+                    }
+                    projects.append(project)
+                except (ValueError, KeyError) as e:
+                    print(f"Warning: Skipping invalid project row: {row}, Error: {str(e)}")
+                    continue
     except FileNotFoundError:
-        print(f"Warning: {csv_path} not found")
+        print(f"Warning: {csv_path} not found, creating new file")
+        # 空のCSVファイルを作成
+        write_projects_to_csv([])
+    except Exception as e:
+        print(f"Error reading projects CSV: {str(e)}")
         return []
     return projects
 
 def write_projects_to_csv(projects):
     csv_path = os.path.join(os.path.dirname(__file__), 'data', 'projects.csv')
-    with open(csv_path, 'w', encoding='utf-8', newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=['id', 'title', 'description', 'required_skills', 'location', 'duration', 'status'])
-        writer.writeheader()
-        for project in projects:
-            # スキルをカンマ区切りの文字列に変換
-            project_copy = project.copy()
-            project_copy['required_skills'] = ','.join(project_copy['required_skills'])
-            writer.writerow(project_copy)
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)
+    try:
+        with open(csv_path, 'w', encoding='utf-8', newline='') as file:
+            writer = csv.DictWriter(file, fieldnames=['id', 'title', 'description', 'required_skills', 'location', 'duration', 'status'])
+            writer.writeheader()
+            for project in projects:
+                # スキルをカンマ区切りの文字列に変換
+                project_copy = project.copy()
+                project_copy['required_skills'] = ','.join(str(s) for s in project_copy.get('required_skills', []))
+                writer.writerow(project_copy)
+    except Exception as e:
+        print(f"Error writing projects CSV: {str(e)}")
+        raise
 
 def read_assignments_from_csv():
     assignments = []
@@ -337,7 +362,7 @@ def get_project_assignments(project_id):
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-# ユーザーの担当プロジェクト情報を取得
+# ユーザーの担当プ��ジェクト情報を取得
 @app.route('/api/users/<int:user_id>/assignments', methods=['GET'])
 def get_user_assignments(user_id):
     assignments = read_assignments_from_csv()
