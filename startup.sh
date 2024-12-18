@@ -56,7 +56,11 @@ pip list
 # 環境変数の設定
 export PORT=8181
 export WEBSITES_PORT=8181
-export GUNICORN_CMD_ARGS="--bind=0.0.0.0:8181 --workers=2 --threads=4 --timeout=120 --log-level=debug"
+export GUNICORN_BIND="0.0.0.0:8181"
+export GUNICORN_WORKERS=4
+export GUNICORN_THREADS=2
+export GUNICORN_TIMEOUT=120
+export GUNICORN_LOG_LEVEL=info
 export FLASK_APP=app
 export FLASK_ENV=production
 export PYTHONUNBUFFERED=1
@@ -67,11 +71,29 @@ env | grep -E 'PORT|FLASK|PYTHON|WEBSITE|GUNICORN'
 
 echo "$(date -u) - Starting Gunicorn..."
 
+# プロセスの確認と終了
+echo "Checking for existing Gunicorn processes..."
+pkill gunicorn || true
+sleep 2
+
 # Gunicornの起動（デバッグ情報を追加）
 echo "Starting Gunicorn with the following configuration:"
-echo "Port: $PORT"
+echo "Bind: $GUNICORN_BIND"
+echo "Workers: $GUNICORN_WORKERS"
+echo "Threads: $GUNICORN_THREADS"
+echo "Timeout: $GUNICORN_TIMEOUT"
+echo "Log Level: $GUNICORN_LOG_LEVEL"
 echo "Working Directory: $(pwd)"
 echo "Python Path: $PYTHONPATH"
-echo "Gunicorn Args: $GUNICORN_CMD_ARGS"
 
-exec gunicorn app:app
+exec gunicorn \
+    --bind=$GUNICORN_BIND \
+    --workers=$GUNICORN_WORKERS \
+    --threads=$GUNICORN_THREADS \
+    --timeout=$GUNICORN_TIMEOUT \
+    --log-level=$GUNICORN_LOG_LEVEL \
+    --access-logfile=/home/LogFiles/gunicorn_access.log \
+    --error-logfile=/home/LogFiles/gunicorn_error.log \
+    --capture-output \
+    --preload \
+    app:app

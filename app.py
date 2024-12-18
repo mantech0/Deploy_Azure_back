@@ -19,9 +19,6 @@ CORS(app, resources={
     }
 })
 
-# ポート設定を環境変数から取得
-PORT = 8181  # 固定値として設定
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 os.makedirs(DATA_DIR, exist_ok=True)
@@ -33,7 +30,7 @@ def read_users_from_csv():
         with open(csv_path, 'r', encoding='utf-8') as file:
             reader = csv.DictReader(file)
             for row in reader:
-                # スキルをリ���トに変換（カンマ区切りの文字列か）
+                # スキルをリストに変換（カンマ区切りの文字列か）
                 skills = row.get('skills', '').split(',') if row.get('skills') else []
                 user = {
                     'id': int(row['id']),
@@ -51,7 +48,7 @@ def read_users_from_csv():
 
 def write_users_to_csv(users):
     csv_path = os.path.join(os.path.dirname(__file__), 'data', 'users.csv')
-    os.makedirs(os.path.dirname(csv_path), exist_ok=True)  # データディレクトリがない場合���作成
+    os.makedirs(os.path.dirname(csv_path), exist_ok=True)  # データディレクトリがない場合作成
     with open(csv_path, 'w', encoding='utf-8', newline='') as file:
         writer = csv.DictWriter(file, fieldnames=['id', 'name', 'email', 'skills', 'experience', 'prefecture'])
         writer.writeheader()
@@ -181,7 +178,7 @@ def update_user(user_id):
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-# 案件関連のエンドポイント
+# 案件関連のエ��ドポイント
 @app.route('/api/projects', methods=['GET'])
 def get_projects():
     projects = read_projects_from_csv()
@@ -368,7 +365,7 @@ def remove_assignment(project_id, assignment_id):
 
 if __name__ == '__main__':
     print('----------------------------------------')
-    print(f'🚀 バックエンドサーバーが起動しました')
+    print(f'🚀 バックエンドサーバーが起動���ました')
     port = int(os.getenv('PORT', 8181))
     print(f'📡 サーバーURL: http://localhost:{port}')
     print('----------------------------------------')
