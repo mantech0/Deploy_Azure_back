@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 
 app = Flask(__name__)
+api = Blueprint('api', __name__)
 
 # CORSの設定
 FRONTEND_URL = "https://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net"
@@ -18,10 +19,6 @@ CORS(app, resources={
         "expose_headers": ["Content-Type", "Authorization"]
     }
 })
-
-# APIルートの設定
-api = Blueprint('api', __name__, url_prefix='/api')
-app.register_blueprint(api)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
@@ -206,23 +203,14 @@ def not_found_error(error):
     }), 404
 
 # ユーザー関連のエンドポイント
-@app.route('/api/users/<int:user_id>/assignments', methods=['GET'])
-def get_user_assignments(user_id):
-    assignments = read_assignments_from_csv()
-    user_assignments = [a for a in assignments if a['user_id'] == user_id]
-    
-    # プロジェクトの詳細情報を取得
-    projects = read_projects_from_csv()
-    for assignment in user_assignments:
-        project = next((p for p in projects if p['id'] == assignment['project_id']), None)
-        if project:
-            assignment['project'] = project
-
-    response = make_response(json.dumps(user_assignments, ensure_ascii=False))
+@api.route('/users', methods=['GET'])
+def get_users():
+    users = read_users_from_csv()
+    response = make_response(json.dumps(users, ensure_ascii=False))
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-@app.route('/api/users/<int:user_id>', methods=['GET'])
+@api.route('/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
     users = read_users_from_csv()
     user = next((user for user in users if user["id"] == user_id), None)
@@ -232,7 +220,7 @@ def get_user(user_id):
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-@app.route('/api/users/<int:user_id>', methods=['PUT'])
+@api.route('/users/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
     users = read_users_from_csv()
     user_index = next((index for index, user in enumerate(users) if user["id"] == user_id), None)
@@ -254,7 +242,7 @@ def update_user(user_id):
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-@app.route('/api/users', methods=['GET'])
+@api.route('/users', methods=['GET'])
 def get_users():
     users = read_users_from_csv()
     response = make_response(json.dumps(users, ensure_ascii=False))
@@ -262,22 +250,14 @@ def get_users():
     return response
 
 # プロジェクト関連のエンドポイント
-@app.route('/api/projects/<int:project_id>/assignments', methods=['GET'])
-def get_project_assignments(project_id):
-    assignments = read_assignments_from_csv()
-    project_assignments = [a for a in assignments if a['project_id'] == project_id]
-    
-    users = read_users_from_csv()
-    for assignment in project_assignments:
-        user = next((u for u in users if u['id'] == assignment['user_id']), None)
-        if user:
-            assignment['user'] = user
-
-    response = make_response(json.dumps(project_assignments, ensure_ascii=False))
+@api.route('/projects', methods=['GET'])
+def get_projects():
+    projects = read_projects_from_csv()
+    response = make_response(json.dumps(projects, ensure_ascii=False))
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-@app.route('/api/projects/<int:project_id>', methods=['GET'])
+@api.route('/projects/<int:project_id>', methods=['GET'])
 def get_project(project_id):
     projects = read_projects_from_csv()
     project = next((project for project in projects if project["id"] == project_id), None)
@@ -287,7 +267,7 @@ def get_project(project_id):
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-@app.route('/api/projects/<int:project_id>', methods=['PUT'])
+@api.route('/projects/<int:project_id>', methods=['PUT'])
 def update_project(project_id):
     projects = read_projects_from_csv()
     project_index = next((index for index, project in enumerate(projects) if project["id"] == project_id), None)
@@ -310,7 +290,7 @@ def update_project(project_id):
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-@app.route('/api/projects/<int:project_id>', methods=['DELETE'])
+@api.route('/projects/<int:project_id>', methods=['DELETE'])
 def delete_project(project_id):
     projects = read_projects_from_csv()
     project_index = next((index for index, project in enumerate(projects) if project["id"] == project_id), None)
@@ -320,16 +300,16 @@ def delete_project(project_id):
     deleted_project = projects.pop(project_index)
     write_projects_to_csv(projects)
     
-    return jsonify({"message": "案件を削除しま��た", "project": deleted_project})
+    return jsonify({"message": "案件を削除しました", "project": deleted_project})
 
-@app.route('/api/projects', methods=['GET'])
+@api.route('/projects', methods=['GET'])
 def get_projects():
     projects = read_projects_from_csv()
     response = make_response(json.dumps(projects, ensure_ascii=False))
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-@app.route('/api/projects', methods=['POST'])
+@api.route('/projects', methods=['POST'])
 def create_project():
     projects = read_projects_from_csv()
     data = request.get_json()
@@ -354,7 +334,7 @@ def create_project():
     return response, 201
 
 # 新規ユーザー登録エンドポイントを追加
-@app.route('/api/register', methods=['POST'])
+@api.route('/register', methods=['POST'])
 def register_user():
     users = read_users_from_csv()
     data = request.get_json()
@@ -379,7 +359,7 @@ def register_user():
     return response, 201
 
 # プロジェクトに担当者を割り当て
-@app.route('/api/projects/<int:project_id>/assignments', methods=['POST'])
+@api.route('/projects/<int:project_id>/assignments', methods=['POST'])
 def create_project_assignment(project_id):
     data = request.get_json()
     user_id = data.get('user_id')
@@ -412,7 +392,7 @@ def create_project_assignment(project_id):
     return response, 201
 
 # プロジェクトの担当者を解除
-@app.route('/api/projects/<int:project_id>/assignments/<int:assignment_id>', methods=['DELETE'])
+@api.route('/projects/<int:project_id>/assignments/<int:assignment_id>', methods=['DELETE'])
 def remove_assignment(project_id, assignment_id):
     assignments = read_assignments_from_csv()
     assignment_index = next((index for index, a in enumerate(assignments) 
@@ -425,6 +405,9 @@ def remove_assignment(project_id, assignment_id):
     write_assignments_to_csv(assignments)
     
     return jsonify({"message": "割り当てを解除しました", "assignment": removed})
+
+# Blueprintを登録（最後に配置）
+app.register_blueprint(api, url_prefix='/api')
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8000))
