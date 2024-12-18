@@ -32,7 +32,7 @@ def read_users_from_csv():
             reader = csv.DictReader(file)
             for row in reader:
                 try:
-                    # スキルをリストに変換（�����ンマ区切りの文字列か）
+                    # スキルをリストに変換（カンマ区切りの文字列か）
                     skills = row.get('skills', '').split(',') if row.get('skills') else []
                     user = {
                         'id': int(row.get('id', 0)),
@@ -148,6 +148,7 @@ def write_assignments_to_csv(assignments):
         for assignment in assignments:
             writer.writerow(assignment)
 
+# ヘルスチェックエンドポイント
 @app.route('/')
 @app.route('/health')
 def health_check():
@@ -217,7 +218,7 @@ def get_user(user_id):
     users = read_users_from_csv()
     user = next((user for user in users if user["id"] == user_id), None)
     if user is None:
-        return jsonify({"error": "ユーザーが見つかりません"}), 404
+        return jsonify({"error": "���ーザーが見つかりません"}), 404
     response = make_response(json.dumps(user, ensure_ascii=False))
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
@@ -252,7 +253,7 @@ def get_users():
     return response
 
 # プロジェクト関連のエンドポイント
-@api.route('/api/projects', methods=['GET'])
+@api.route('/projects', methods=['GET'])
 def get_projects():
     try:
         print(f"Loading projects from: {os.path.join(os.path.dirname(__file__), 'data', 'projects.csv')}")
@@ -264,7 +265,7 @@ def get_projects():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@api.route('/api/projects/<int:project_id>', methods=['GET'])
+@api.route('/projects/<int:project_id>', methods=['GET'])
 def get_project(project_id):
     try:
         projects = read_projects_from_csv()
@@ -297,25 +298,6 @@ def update_project(project_id):
     write_projects_to_csv(projects)
     
     response = make_response(json.dumps(projects[project_index], ensure_ascii=False))
-    response.headers['Content-Type'] = 'application/json; charset=utf-8'
-    return response
-
-@api.route('/projects/<int:project_id>', methods=['DELETE'])
-def delete_project(project_id):
-    projects = read_projects_from_csv()
-    project_index = next((index for index, project in enumerate(projects) if project["id"] == project_id), None)
-    if project_index is None:
-        return jsonify({"error": "案件が見つかりません"}), 404
-    
-    deleted_project = projects.pop(project_index)
-    write_projects_to_csv(projects)
-    
-    return jsonify({"message": "案件を削除しました", "project": deleted_project})
-
-@api.route('/projects', methods=['GET'])
-def get_projects():
-    projects = read_projects_from_csv()
-    response = make_response(json.dumps(projects, ensure_ascii=False))
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
@@ -416,7 +398,7 @@ def remove_assignment(project_id, assignment_id):
     
     return jsonify({"message": "割り当てを解除しました", "assignment": removed})
 
-# Blueprintを登録（最後に配置）
+# Blueprintを登録
 app.register_blueprint(api, url_prefix='/api')
 
 if __name__ == '__main__':
