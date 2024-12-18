@@ -125,17 +125,56 @@ def write_assignments_to_csv(assignments):
 @app.route('/')
 @app.route('/health')
 def health_check():
+    try:
+        # データディレクトリとCSVファイルの存在確認
+        data_dir = os.path.join(os.path.dirname(__file__), 'data')
+        data_dir_exists = os.path.exists(data_dir)
+        users_csv = os.path.exists(os.path.join(data_dir, 'users.csv'))
+        projects_csv = os.path.exists(os.path.join(data_dir, 'projects.csv'))
+        assignments_csv = os.path.exists(os.path.join(data_dir, 'project_assignments.csv'))
+
+        return jsonify({
+            "message": "Welcome to SkillNow API",
+            "status": "running",
+            "timestamp": datetime.now().isoformat(),
+            "env": {
+                "PORT": os.getenv('PORT'),
+                "WEBSITES_PORT": os.getenv('WEBSITES_PORT'),
+                "FLASK_ENV": os.getenv('FLASK_ENV'),
+                "FRONTEND_URL": FRONTEND_URL,
+                "PYTHON_PATH": os.getenv('PYTHONPATH'),
+                "WORKING_DIR": os.getcwd()
+            },
+            "filesystem": {
+                "data_dir_exists": data_dir_exists,
+                "users_csv_exists": users_csv,
+                "projects_csv_exists": projects_csv,
+                "assignments_csv_exists": assignments_csv,
+                "current_directory": os.listdir('.')
+            }
+        })
+    except Exception as e:
+        return jsonify({
+            "status": "error",
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 500
+
+@app.errorhandler(500)
+def internal_error(error):
     return jsonify({
-        "message": "Welcome to SkillNow API",
-        "status": "running",
-        "timestamp": datetime.now().isoformat(),
-        "env": {
-            "PORT": os.getenv('PORT'),
-            "WEBSITES_PORT": os.getenv('WEBSITES_PORT'),
-            "FLASK_ENV": os.getenv('FLASK_ENV'),
-            "FRONTEND_URL": FRONTEND_URL
-        }
-    })
+        "error": "Internal Server Error",
+        "message": str(error),
+        "timestamp": datetime.now().isoformat()
+    }), 500
+
+@app.errorhandler(404)
+def not_found_error(error):
+    return jsonify({
+        "error": "Not Found",
+        "message": str(error),
+        "timestamp": datetime.now().isoformat()
+    }), 404
 
 # ユーザー関連のエンドポイント
 @app.route('/api/users', methods=['GET'])
@@ -178,7 +217,7 @@ def update_user(user_id):
     response.headers['Content-Type'] = 'application/json; charset=utf-8'
     return response
 
-# 案件関連のエ��ドポイント
+# 案件関連のエンドポイント
 @app.route('/api/projects', methods=['GET'])
 def get_projects():
     projects = read_projects_from_csv()
@@ -365,7 +404,7 @@ def remove_assignment(project_id, assignment_id):
 
 if __name__ == '__main__':
     print('----------------------------------------')
-    print(f'🚀 バックエンドサーバーが起動���ました')
+    print(f'🚀 バックエンドサーバーが起動しました')
     port = int(os.getenv('PORT', 8181))
     print(f'📡 サーバーURL: http://localhost:{port}')
     print('----------------------------------------')
