@@ -9,14 +9,11 @@ app = Flask(__name__)
 api = Blueprint('api', __name__)
 
 # CORSの設定
-FRONTEND_URL = "https://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net"
 CORS(app, resources={
     r"/*": {
-        "origins": [FRONTEND_URL, "http://localhost:3000"],
+        "origins": ["https://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net"],
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type", "Authorization"],
-        "supports_credentials": True,
-        "expose_headers": ["Content-Type", "Authorization"]
+        "allow_headers": ["Content-Type"]
     }
 })
 
