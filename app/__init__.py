@@ -9,13 +9,7 @@ app = Flask(__name__)
 api = Blueprint('api', __name__)
 
 # CORSの設定
-CORS(app, resources={
-    r"/*": {
-        "origins": ["https://tech0-gen-8-step3-testapp-node2-26.azurewebsites.net"],
-        "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # データディレクトリの設定
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
